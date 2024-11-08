@@ -1,0 +1,53 @@
+numDevices = 80; % Number of devices
+deviceRange = 300; % Define device range in meters
+groundWidth = 2000; % Define ground width size in meters
+
+rng(0) % make deterministic
+
+% Preallocate result matrix with the correct size (20-by-2 for 20 devices)
+result = zeros(numDevices, 2);
+
+% Generate random values based on the number of devices
+result(:,1) = randi([1 groundWidth], numDevices, 1); % X data
+result(:,2) = randi([1 groundWidth], numDevices, 1); % Y data
+
+% Create a scatter plot
+scatter(result(:,1), result(:,2), 'filled');
+xlabel('Ground Area');
+ylabel('Ground Width');
+xticks(0:200:groundWidth)
+yticks(0:200:groundWidth)
+xlim([0 groundWidth])
+ylim([0 groundWidth])
+daspect([1 1 1])
+title(['Scatter Plot of Simulated Ground (' num2str(numDevices) ' devices)']);
+grid on;
+% Hold the plot to overlay the circles
+hold on;
+
+% Plot thin red circles around each device
+% for i = 1:numDevices
+%     % Create a circle with a given radius and position
+%     rectangle('Position', [result(i,1)-deviceRange, result(i,2)-deviceRange, 2*deviceRange, 2*deviceRange], ...
+%               'Curvature', [1, 1], 'EdgeColor', 'r', 'EdgeColorMode', 'auto'); 
+% end
+hold off;
+
+adjMatrix = zeros(numDevices, numDevices);
+for i = 1:numDevices
+    for j = 1:numDevices
+        if (sqrt( abs(result(i,1)-result(j,1))^2 + abs(result(i,2)-result(j,2))^2) <= deviceRange)
+            adjMatrix(i,j) = 1;
+            if (i==j)
+                adjMatrix(i,j) = 0;
+            end
+        end
+    end
+end
+grp = graph(adjMatrix);
+% Release the hold on the plot
+[bin,binsize] = conncomp(grp);
+plot(grp, "NodeLabel",'')
+title('Node Graph of Simulated Devices')
+subtitle(num2str(100-binsize(1)/80*100) + "% Not Conneted to the Largest Cluster: ")
+sim = Simulation()
